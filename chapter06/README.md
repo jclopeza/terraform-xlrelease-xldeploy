@@ -40,3 +40,17 @@ git clone https://github.com/jclopeza/playbooks-provisioning.git
 cd playbooks-provisioning
 git checkout ${tag_ansible_selected}
 ```
+
+### Paso 4: Provisioning de la instancia-front EC2 en Amazon (Ansible: Run Playbook)
+*Para definir este step, es necesario crear un servidor de tipo Unix Host remoto que será desde el que se ejecuten los playbooks, sería la máquina de control de Ansible. Bajo 'Settings -> Shared configuration' o bajo la pestaña 'Configuration' dentro de la carpeta en la que se ubique la template se debe crear un Unix Host.*
+
+Tenemos los playbooks en el directorio `/tmp/playbooks-provisioning`. Tenemos que provisionar la instancia 'front' y la instancia 'bdd'. Habrá que ejecutar para la parte front:
+* Playbook Path: `/tmp/playbooks-provisioning/playbook-front.yml`
+* Additional command line parameters: `-u ubuntu -i "${ip_front}," --private-key "${private_key_path}" --ssh-common-args="-o StrictHostKeyChecking=no"`
+
+Y para la parte bdd:
+* Playbook Path: `/tmp/playbooks-provisioning/playbook-bdd.yml`
+* Additional command line parameters: `-u ubuntu -i "${ip_bdd}," --private-key "${private_key_path}" --ssh-common-args="-o StrictHostKeyChecking=no"`
+
+### Paso 5: Creación de entorno en XLD (XL Deploy CLI: Run Script from URL)
+Ya tenemos nuestras instancias EC2 con todo el middleware instalado. Ahora vamos a informar a XL Deploy de este nuevo middleware para que podamos ser capaces de desplegar nuevas aplicaciones en él.
