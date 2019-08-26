@@ -29,3 +29,7 @@ Esta versión de nuestra infraestructura tendrá un único componente de tipo 't
 * private_key_path
 
 Pero el valor de estas variables no está definido, en su lugar, hemos puesto unos 'placeholders' que es lo que me permitirá reutilizar esta misma versión de mi infraestructura para provisionar varios entornos. Esto lo gestionaré mediante diccionarios, en ellos almacenaré la configuración y los distintos valores que aplicaré a los entornos de desarrollo, preproducción y produccción.
+
+Además del componente de infraestructura, hemos asociado dos templates. ¿Para qué?. Bien, cuando apliquemos las templates de Terraform, se crearán dos nuevas instancias EC2 en Amazon a las que luego querremos acceder para instalar software, aplicaciones, etc. Cada una de estas instancias tendrá una dirección IP y la clave pública que hemos pasado como parámetro.
+
+Con las templates que hemos asociado, automáticamente se crearán en XL Deploy dos CIs de infraestructura del tipo overthere.SshHost listos para utilizarse y asociarse a entornos de despliegue.
