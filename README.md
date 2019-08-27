@@ -141,9 +141,9 @@ We have to find a solution that **scales** and that responds to the problems we 
 
 ## You will find ...
 * [Chapter 1:](chapter01/README.md) Terraform templates
-* [Chapter 2:](chapter02/README.md) ¿Dónde almacenar y ejecutar estas templates?
-* [Chapter 3:](chapter03/README.md) ¿Dónde recoger los parámetros?
-* [Chapter 4:](chapter04/README.md) ¿Cómo y desde dónde ejecuto las templates de Terraform?
-* [Chapter 5:](chapter05/README.md) ¿Cómo inicio la ejecución?
-* [Chapter 6:](chapter06/README.md) ¿Cómo provisiono la nueva infraestructura creada?
-* [Chapter 7:](chapter07/README.md) ¿Cómo notificamos la nueva infraestructura creada?
+* [Chapter 2:](chapter02/README.md) Where to store and execute these templates?
+* [Chapter 3:](chapter03/README.md) How to get the parameters?
+* [Chapter 4:](chapter04/README.md) How and from where do I execute those templates?
+* [Chapter 5:](chapter05/README.md) How do I start the execution?
+* [Chapter 6:](chapter06/README.md) How to provision the new infrastructure?
+* [Chapter 7:](chapter07/README.md) How to notify that there is a new infrastructure available?
