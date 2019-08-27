@@ -1,4 +1,4 @@
-# Cómo y desde dónde ejecuto las templates de Terraform?
+# ¿Cómo y desde dónde ejecuto las templates de Terraform?
 ¿Cómo y desde dónde ejecuto las templates de Terraform pasando los parámetros necesarios y con los valores que hemos facilitado?
 
 De esto se va a encargar XL Deploy. Vamos a definir los CIs necesarios para poder hacer el despliegue de esta infraestructura con XL Deploy. Vamos a:

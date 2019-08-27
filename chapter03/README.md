@@ -1,4 +1,4 @@
-# Dónde recoger los parámetros?
+# ¿Dónde recoger los parámetros?
 Vamos a empezar a diseñar nuestra 'template' en XL Release.
 
 El primer paso será recoger los parámetros que vamos a utilizar para crear nuestra infraestructura. Nombre del proyecto, entorno, región de AWS, tamaño de las instancias EC2, las claves pública y privada que vamos a utilizar para acceder a ellas, etc.

@@ -1,4 +1,4 @@
-# Cómo inicio la ejecución?
+# ¿Cómo inicio la ejecución?
 ¿Cómo inicio la ejecución de las templates de Terraform?
 
 Ya tenemos todo lo necesario para iniciar este despliegue. Tenemos el Deployment Package en XL Deploy y el 'environment' que acabamos de crear de forma dinámica (configurado con un cliente de Terraform y un diccionario con todos los parámetros que se tienen que aplicar).

@@ -1,4 +1,4 @@
-# Cómo notificamos la nueva infraestructura creada?
+# ¿Cómo notificamos la nueva infraestructura creada?
 Tenemos nuestra infraestructura creada en Amazon y ahora quiero notificar la disponibilidad de la misma, generar gráficos, indicar las versiones de las templates de Terraform con la que se ha generados y la versión de los playbooks de Ansible utilizados, etc.
 
 Esta será nuestra quinta fase en XL Release.

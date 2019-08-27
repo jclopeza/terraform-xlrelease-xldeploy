@@ -1,4 +1,4 @@
-# Cómo provisiono la nueva infraestructura creada?
+# ¿Cómo provisiono la nueva infraestructura creada?
 Tenemos creada nuestra infraestructura en Amazon (dos instancias EC2) y hemos creado dos nuevas máquinas en XL Deploy con las direcciones IP y demás información necesaria para acceder a ellas.
 
 Ahora queremos instalar el middleware necesario en estas máquinas para poder ejecutar nuestras aplicaciones (tomcat, mysql-server, etc.).

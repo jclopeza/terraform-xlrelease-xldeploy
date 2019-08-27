@@ -1,4 +1,4 @@
-# Dónde almacenar y ejecutar estas templates?
+# ¿Dónde almacenar y ejecutar estas templates?
 Hemos creado tres ficheros, `variables.tf`, `terraform.tf` y `outputs.tf`.
 
 Voy a desplegar estas templates con XL Deploy, la mejor herramienta del mercado para desplegar software. Al utilizar XL Deploy tendremos resueltas muchas de las preguntas que nos hicimos anteriormente.
