@@ -54,3 +54,20 @@ Y para la parte bdd:
 
 ### Paso 5: Creación de entorno en XLD (XL Deploy CLI: Run Script from URL)
 Ya tenemos nuestras instancias EC2 con todo el middleware instalado. Ahora vamos a informar a XL Deploy de este nuevo middleware para que podamos ser capaces de desplegar nuevas aplicaciones en él.
+
+Se ejecutará:
+* el script: `https://raw.githubusercontent.com/jclopeza/xlr-scripts/master/createXLDResourcesTerraformModuleJavaBddProjectContainers.py`
+* con las opciones: `${environment} ${project_name} ${ip_front} ${ip_bdd}`
+
+Esto creará nuevos containers bajo los hosts creados en XL Deploy:
+* axis2.Deployer
+* tomcat.Server
+* tomcat.VirtualHost
+* smoketest.Runner
+* sql.MySqlClient
+
+Creará un nuevo diccionario:
+* ip_front
+* ip_bdd
+
+Creará un nuevo entorno con los containers y el diccionario asociado.

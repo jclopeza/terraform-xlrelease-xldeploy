@@ -22,6 +22,8 @@ Algunas de ellas como 'environment', 'aws_region' o 'instance_type' pueden ser d
 
 La template de Terraform se lanzará desde una máquina que tendrá que tener acceso a la public_key_path para que pueda instalarla en las máquinas EC2 que se van a crear.
 
+![xlrelease image](img_051.png)
+
 ### Paso 2: Verificación de existencia de proyecto de infraestructura para ${project_name} (XL Deploy CI: Does CI Exist)
 *Para definir este step, es necesario crear un servidor XL Deploy bajo 'Settings -> Shared configuration' o bajo la pestaña 'Configuration' dentro de la carpeta en la que se ubique la template.*
 
