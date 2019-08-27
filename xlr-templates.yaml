@@ -1,0 +1,672 @@
+---
+apiVersion: xl-release/v1
+kind: Templates
+spec:
+- directory: Terraform
+  children:
+  - template: Deprovision infrastructure - java bdd project
+    description: |-
+      # Template para el provisionamiento de nueva infraestructura en AWS
+
+      Esta template se encargar del provisionamiento de una nueva infraestructura en AWS
+    phases:
+    - phase: OBTENCIÓN DE DATOS
+      tasks:
+      - name: Parámetros de configuración e infraestructura
+        type: xlrelease.UserInputTask
+        description: |-
+          ## Datos para eliminar la infraestructura
+          Es necesario proporcionar una serie de datos para poder realizar el deprovisioning de la infraestructura en AWS. **Será necesario facilitar los siguientes datos**.
+        variables:
+        - environment
+        - project_name
+      color: '#0099CC'
+    - phase: UNDEPLOY APLICACIONES
+      tasks:
+      - name: Undeploy de las aplicaciones desplegadas
+        type: xlrelease.SequentialGroup
+        tasks:
+        - name: Parte front
+          type: xldeploy.Undeploy
+          server: XL Deploy
+          deployedApplication: Environments/application-${project_name}/application-${project_name}-${environment}/application-${project_name}-${environment}/front
+        - name: Parte webservices
+          type: xldeploy.Undeploy
+          server: XL Deploy
+          deployedApplication: Environments/application-${project_name}/application-${project_name}-${environment}/application-${project_name}-${environment}/webservices
+      color: '#D94C3D'
+    - phase: ELIMINACIÓN DE RECURSOS
+      tasks:
+      - name: Eliminamos entorno de despliegue
+        type: xld.DeleteCI
+        server: XL Deploy
+        ciID: Environments/application-${project_name}
+      - name: Eliminamos elementos de infraestructura
+        type: xlrelease.SequentialGroup
+        tasks:
+        - name: Eliminamos mysql-cli
+          type: xld.DeleteInfrastructure
+          server: XL Deploy
+          ci_id: Infrastructure/${project_name}-${environment}-bdd/mysql-cli
+        - name: Eliminamos axis2
+          type: xld.DeleteInfrastructure
+          server: XL Deploy
+          ci_id: Infrastructure/${project_name}-${environment}-front/axis2
+        - name: Eliminamos smokeTest
+          type: xld.DeleteInfrastructure
+          server: XL Deploy
+          ci_id: Infrastructure/${project_name}-${environment}-front/smokeTest
+        - name: Eliminamos tomcat
+          type: xld.DeleteInfrastructure
+          server: XL Deploy
+          ci_id: Infrastructure/${project_name}-${environment}-front/tomcat
+      color: '#08B153'
+    - phase: DEPROVISION AWS
+      tasks:
+      - name: Deprovision AWS
+        type: xldeploy.Undeploy
+        server: XL Deploy
+        deployedApplication: Environments/infrastructure-${project_name}/infrastructure-${project_name}-${environment}/infrastructure-${project_name}-${environment}/infrastructure-${project_name}
+      - name: Eliminamos entorno AWS
+        type: xld.DeleteCI
+        server: XL Deploy
+        ciID: Environments/infrastructure-${project_name}/infrastructure-${project_name}-${environment}
+      color: '#0099CC'
+    variables:
+    - type: xlrelease.StringVariable
+      key: aws_region
+      requiresValue: false
+      showOnReleaseStart: false
+      label: AWS Region
+      description: Región de AWS en la que se crearán los recursos y la infraestructura
+      valueProvider:
+        type: xlrelease.ListOfStringValueProviderConfiguration
+        values:
+        - us-east-1
+        - us-east-2
+        - us-west-1
+        - us-west-2
+        - eu-west-1
+        - eu-west-2
+        - eu-west-3
+      value: us-east-1
+    - type: xlrelease.StringVariable
+      key: environment
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Entorno
+      description: Entorno objeto de la petición de la infraestructura
+      valueProvider:
+        type: xlrelease.ListOfStringValueProviderConfiguration
+        values:
+        - dev
+        - pre
+        - pro
+      value: dev
+    - type: xlrelease.StringVariable
+      key: instance_type
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Tipo de instancia EC2
+      description: Tipo de las instancias EC2 que se crearán. Para entornos productivos se recomiendan instancias de mayor capacidad.
+      valueProvider:
+        type: xlrelease.ListOfStringValueProviderConfiguration
+        values:
+        - t2.nano
+        - t2.micro
+        - t2.small
+        - t2.medium
+        - t2.large
+        - t2.xlarge
+        - t2.2xlarge
+      value: t2.micro
+    - type: xlrelease.StringVariable
+      key: project_name
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Nombre del proyecto
+      description: Nombre del proyecto a crear. Debe existir una aplicación del mismo nombre en XL Deploy bajo Applications/Infrastructures
+      value: calculator
+    - type: xlrelease.StringVariable
+      key: public_key_path
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Clave pública
+      description: Clave pública que se instalará en los servidores remotos para acceder a ellos. Debe estar accesible desde la máquina que aplique las templates de Terraform.
+      value: /home/jcla/.ssh/id_rsa.pub
+    - type: xlrelease.StringVariable
+      key: private_key_path
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Clave privada
+      description: Clave privada para acceder a las instancias EC2. Debe estar accesible desde la máquina de XL Deploy.
+      value: /home/jcla/.ssh/id_rsa
+    - type: xlrelease.ListStringVariable
+      key: versions_infrastructure_availables
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Versiones de infraestructura disponibles
+      description: Versiones de infraestructura disponibles
+    - type: xlrelease.StringVariable
+      key: version_infrastructure_selected
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Versión de la infraestructura seleccionada
+      valueProvider:
+        type: xlrelease.ListOfStringValueProviderConfiguration
+        variableMapping:
+          values: ${versions_infrastructure_availables}
+    - type: xlrelease.StringVariable
+      key: version_provisioning
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Versión de los playbooks de Ansible para provisionar la infraestructura
+      valueProvider:
+        type: xlrelease.ListOfStringValueProviderConfiguration
+        values:
+        - 3.0.0
+        - 2.0.0
+        - 1.0.0
+      value: 3.0.0
+    - type: xlrelease.StringVariable
+      key: ip_front
+      requiresValue: false
+      showOnReleaseStart: false
+      label: IP de la máquina de front
+      description: IP obtenida de forma dinámica de las instancias EC2 creadas
+    - type: xlrelease.StringVariable
+      key: ip_bdd
+      requiresValue: false
+      showOnReleaseStart: false
+      label: IP de la máquina de bdd
+      description: IP obtenida de forma dinámica de las instancias EC2 creadas
+    - type: xlrelease.StringVariable
+      key: last_version_deployed_front
+      requiresValue: false
+      showOnReleaseStart: false
+    - type: xlrelease.StringVariable
+      key: last_version_deployed_webservices
+      requiresValue: false
+      showOnReleaseStart: false
+    riskProfile: Default risk profile
+  - template: Provision new infrastructure - java bdd project
+    description: |-
+      # Template para el provisionamiento de nueva infraestructura en AWS
+
+      Esta template se encargar del provisionamiento de una nueva infraestructura en AWS
+    scheduledStartDate: 2019-08-08T09:00:00+02:00
+    phases:
+    - phase: OBTENCIÓN DE DATOS
+      tasks:
+      - name: Parámetros de configuración e infraestructura
+        type: xlrelease.UserInputTask
+        description: |-
+          ## Datos para la creación de la infraestructura
+          Es necesario proporcionar una serie de datos para poder realizar el provisioning de la infraestructura en AWS. **Será necesario facilitar los siguientes datos**.
+        variables:
+        - aws_region
+        - environment
+        - instance_type
+        - project_name
+        - public_key_path
+        - private_key_path
+      - name: Verificación de existencia de proyecto de infraestructura para ${project_name}
+        type: xld.DoesCIExist
+        server: XL Deploy
+        ciID: Applications/Infrastructures/infrastructure-${project_name}
+        throwOnFail: true
+        description: |-
+          ## Verificación de existencia de proyecto de infraestructura para ${project_name}
+
+          Será el proyecto con las templates de Terraform que se encargará de hacer el provisioning  de la infraestructura.
+      - name: Obtención de las versiones disponibles para ${project_name}
+        type: xld.GetAllVersions
+        server: XL Deploy
+        applicationId: Applications/Infrastructures/infrastructure-${project_name}
+        description: |-
+          ## Obtención de las versiones disponibles para ${project_name}
+
+          Obtendremos un listado con las **distintas versiones de infraestructura disponibles** para el proyecto ${project_name}
+        variableMapping:
+          pythonScript.packageIds: ${versions_infrastructure_availables}
+      - name: Selección de versión de infraestructura
+        type: xlrelease.UserInputTask
+        description: |-
+          ## Selección de versión de la infraestructura
+          Es necesario proporcionar la versión de la infraestructura que se desea aplicar. Una vez seleccionada, se tendrán:
+
+          * Recursos creados en la región **${aws_region}**
+          * Instancias del tipo **${instance_type}**
+          * Entorno de tipo **${environment}**
+          * Para el proyecto **${project_name}**
+        variables:
+        - version_infrastructure_selected
+      color: '#0099CC'
+    - phase: CREACIÓN DE ENTORNO
+      tasks:
+      - name: Creación de infraestructura base en XLD
+        type: xld.cliUrl
+        cli: xl-deploy-8.6.2-cli
+        scriptUrl: https://raw.githubusercontent.com/jclopeza/xlr-scripts/master/createXLDResourcesTerraformModuleJavaBddProject.py
+        options: ${environment} ${project_name} ${aws_region} ${instance_type} ${private_key_path} ${public_key_path}
+        description: |-
+          ## Creación de recursos en XLD
+
+          Se invocará a la ejecución del script remoto `https://raw.githubusercontent.com/jclopeza/xlr-scripts/master/createXLDResourcesTerraformModuleJavaBddProject.py`
+
+          Este script se ejecutará con el CLI para la creación de los recursos necesarios en XLD
+      - name: Validación de entorno en XLD
+        type: xlrelease.Task
+        description: |-
+          ### Recursos necesarios listos para despliegue de infraestructura
+          Se han facilitado los siguientes datos para la creación de una nueva infraestructura:
+
+          1. **Environment:** ${environment}
+          2. **Proyecto:** ${project_name}
+          3. **Región AWS:** ${aws_region}
+          4. **Tipo de instancias:** ${instance_type}
+          5. **Claves pública y privada:** ${public_key_path} y ${private_key_path}
+
+          ### Entorno de despliegue
+          Se han creado en XL Deploy el entorno necesario para hacer el despliegue.
+
+          #### Nombre del entorno de despliegue:
+          Environments/infrastructure-${project_name}/infrastructure-${project_name}-${environment}/infrastructure-${project_name}-${environment}
+
+          ### Valide que se han creado correctamente los recursos en XLD
+      - name: Validación de solicitud y aprobación del equipo de seguridad
+        type: xlrelease.GateTask
+        description: |-
+          ### Validación de solicitud
+          El equipo de desarrollo solicita la creación de la siguiente infraestructura:
+
+          1. **Environment:** ${environment}
+          2. **Proyecto:** ${project_name}
+          3. **Región AWS:** ${aws_region}
+          4. **Tipo de instancias:** ${instance_type}
+          5. **Claves pública y privada:** ${public_key_path} y ${private_key_path}
+
+          ### El entorno de despliegue ya ha sido validado
+          Environments/infrastructure-${project_name}/infrastructure-${project_name}-${environment}/infrastructure-${project_name}-${environment}
+        precondition: '"${environment}" == "pro"'
+        locked: true
+      color: '#D94C3D'
+    - phase: CREACIÓN DE INFRAESTRUCTURA
+      tasks:
+      - name: Creación de infraestructura en AWS
+        type: xldeploy.Deploy
+        server: XL Deploy
+        deploymentPackage: ${version_infrastructure_selected}
+        deploymentEnvironment: Environments/infrastructure-${project_name}/infrastructure-${project_name}-${environment}/infrastructure-${project_name}-${environment}
+      - name: Obtención de las IPs remotas
+        type: xlrelease.ParallelGroup
+        tasks:
+        - name: IP de la máquina front
+          type: xld.GetCIStringProperty
+          server: XL Deploy
+          ciID: Infrastructure/${project_name}-${environment}-front
+          ciPropertyName: address
+          variableMapping:
+            pythonScript.ciPropertyValue: ${ip_front}
+        - name: IP de la máquina bdd
+          type: xld.GetCIStringProperty
+          server: XL Deploy
+          ciID: Infrastructure/${project_name}-${environment}-bdd
+          ciPropertyName: address
+          variableMapping:
+            pythonScript.ciPropertyValue: ${ip_bdd}
+      color: '#08B153'
+    - phase: PROVISIONING
+      tasks:
+      - name: Selección de versión de playbooks de Ansible a ejecutar
+        type: xlrelease.SequentialGroup
+        tasks:
+        - name: Obtención de las versiones disponibles de playbooks
+          type: xlrelease.ScriptTask
+          description: '### Este script se encarga de consultar a Github las versiones
+            disponibles de los playbooks para el provisioning'
+          script: |-
+            import json
+            gitServer = 'https://api.github.com'
+            request = HttpRequest({'url': gitServer})
+            response = request.get('/repos/jclopeza/playbooks-provisioning/tags', contentType='application/json')
+            listTags = []
+            data = json.loads(response.response)
+            for i in data:
+                listTags = listTags + [i['name']]
+            releaseVariables['list_tags'] = listTags
+        - name: Selección de versión de provisioning
+          type: xlrelease.UserInputTask
+          description: |-
+            ### Máquinas a provisionar
+            Se van a provisionar las máquinas:
+
+            #### ${project_name}-${environment}-front con IP = ${ip_front}
+            #### ${project_name}-${environment}-bdd con IP = ${ip_bdd}
+
+            ### Versión de los playbooks
+            Debe seleccionar la versión de los playbooks que se van a utilizar para hacer el provisioning del nuevo entorno creado.
+
+            #### Debe seleccionar entre una de las versiones que hay disponibles para el proyecto ${project_name}
+          variables:
+          - tag_ansible_selected
+        - name: Checkout a la versión de los playbooks seleccionada
+          type: remoteScript.Unix
+          script: |-
+            cd /tmp && rm -fr playbooks-provisioning
+            git clone https://github.com/jclopeza/playbooks-provisioning.git
+            cd playbooks-provisioning
+            git checkout ${tag_ansible_selected}
+          address: localhost
+          username: jcla
+      - name: Provisioning de instancias
+        type: xlrelease.ParallelGroup
+        tasks:
+        - name: Provisioning de la instancia-front EC2 en Amazon
+          type: ansible.RunPlaybook
+          host: ansible-machine-control
+          playbookPath: /tmp/playbooks-provisioning/playbook-front.yml
+          cmdParams: -u ubuntu -i "${ip_front}," --private-key "${private_key_path}" --ssh-common-args="-o StrictHostKeyChecking=no" -e "public_key_path=${public_key_path}"
+          description: |-
+            ### Ejecución del script de provisioning
+            Este script provisionará la instancia EC2 que encargará de la parte front.
+        - name: Provisioning de la instancia-bdd EC2 en Amazon
+          type: ansible.RunPlaybook
+          host: ansible-machine-control
+          playbookPath: /tmp/playbooks-provisioning/playbook-bdd.yml
+          cmdParams: -u ubuntu -i "${ip_bdd}," --private-key "${private_key_path}" --ssh-common-args="-o StrictHostKeyChecking=no"
+          description: |-
+            ### Ejecución del script de provisioning
+            Este script provisionará la instancia EC2 que encargará de la parte bdd.
+      - name: Creación de entorno en XLD
+        type: xld.cliUrl
+        cli: xl-deploy-8.6.2-cli
+        scriptUrl: https://raw.githubusercontent.com/jclopeza/xlr-scripts/master/createXLDResourcesTerraformModuleJavaBddProjectContainers.py
+        options: ${environment} ${project_name} ${ip_front} ${ip_bdd}
+        description: |-
+          ## Creación de recursos en XLD
+
+          Se invocará a la ejecución del script remoto `https://raw.githubusercontent.com/jclopeza/xlr-scripts/master/createXLDResourcesTerraformModuleJavaBddProjectContainers.py`
+
+          Este script se ejecutará con el CLI para la creación de nuevos containers en XLD y un nuevo entorno de despliegue.
+      - name: Notificación a desarrollo de nuevo entorno disponible
+        type: xlrelease.NotificationTask
+        description: |-
+          ### Notificación a desarrollo de nuevo entorno disponible
+          Notificación al equipo de desarrollo de que se ha creado el nuevo entorno para que puedan desplegarse las aplicaciones correspondientes.
+        addresses:
+        - oscar@gmail.com
+        subject: Entorno disponible para ${project_name} y entorno ${environment}
+        body: |-
+          ### Entorno creado para el proyecto ${project_name} y entorno ${environment}
+
+          Se ha creado un nuevo entorno en XL Deploy para que pueda desplegar su aplicación.
+      color: '#991C71'
+    - phase: COMUNICACIÓN Y VALIDACIÓN
+      tasks:
+      - name: Generación de reports
+        type: xlrelease.SequentialGroup
+        tasks:
+        - name: Generación de gráfico con la infraestructura
+          type: remoteScript.Unix
+          script: |-
+            #!/bin/bash
+            TERRAFORMDIR=/var/opt/xebialabs/terraform-states/${project_name}-${environment}
+            HTMLDIR=/var/www/html/${project_name}-${environment}
+            [ -d $TERRAFORMDIR ] || exit 1
+            [ -d $HTMLDIR ] || mkdir -p $HTMLDIR
+            [ -f $HTMLDIR/graph.svg ] && rm $HTMLDIR/graph.svg
+            [ -f $HTMLDIR/index.html ] && rm $HTMLDIR/index.html
+            cd $TERRAFORMDIR
+            cd -- "$(find . -name terraform.tfstate -type f -printf '%h' -quit)"
+            terraform graph | dot -Tsvg > $HTMLDIR/graph.svg
+          address: localhost
+          username: jcla
+        - name: Generación de html
+          type: remoteScript.Unix
+          script: python generateTerraformHtmlReport.py ${environment} ${project_name} ${aws_region} ${instance_type} ${version_infrastructure_selected} ${tag_ansible_selected}
+          remotePath: /home/jcla/Projects/xlr-scripts
+          address: localhost
+          username: jcla
+      - name: Validación de conexión a hosts remotos
+        type: xlrelease.Task
+        description: |-
+          ### Validación de conexión a hosts remotos
+          Se han creado nuevas instancias EC2 en XL Deploy. Debe acceder para comprobar que hay conectividad con las claves proporcionadas.
+
+          #### Los nombres de las máquinas son "${project_name}-${environment}-*"
+      - name: Infraestructura creada en AWS
+        type: xlrelease.NotificationTask
+        description: |-
+          ### Notificación de infraestructura creada
+          Notificación al equipo de operaciones de que se ha creado la estructura y de que debe acometer ciertas operaciones.
+        addresses:
+        - ramon@gmail.com
+        subject: Infraestructura provisionada para el proyecto ${project_name} y entorno ${environment}
+        body: |-
+          ### Infraestructura provisionada para el proyecto ${project_name} y entorno ${environment}
+
+          Se ha creado nueva infraestructura en AWS. Recuerde que:
+
+          * Debe habilitar la monitorización
+          * Debe establecer alertas de consumo
+          * Debe notificar cualquier anomalía o corte de servicio a la dirección sistemas@gmail.com
+
+          Estos son los datos relacionados con la infraestructura:
+
+          1. **Environment:** ${environment}
+          2. **Proyecto:** ${project_name}
+          3. **Región AWS:** ${aws_region}
+          4. **Tipo de instancias:** ${instance_type}
+          5. **Claves pública y privada:** ${public_key_path} y ${private_key_path}
+
+          También puedes consultar el [gráfico de la estructura creada](http://localhost/${project_name}-${environment}).
+      color: '#FD8D10'
+    variables:
+    - type: xlrelease.StringVariable
+      key: aws_region
+      requiresValue: false
+      showOnReleaseStart: false
+      label: AWS Region
+      description: Región de AWS en la que se crearán los recursos y la infraestructura
+      valueProvider:
+        type: xlrelease.ListOfStringValueProviderConfiguration
+        values:
+        - us-east-1
+        - us-east-2
+        - us-west-1
+        - us-west-2
+        - eu-west-1
+        - eu-west-2
+        - eu-west-3
+      value: us-east-1
+    - type: xlrelease.StringVariable
+      key: environment
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Entorno
+      description: Entorno objeto de la petición de la infraestructura
+      valueProvider:
+        type: xlrelease.ListOfStringValueProviderConfiguration
+        values:
+        - dev
+        - pre
+        - pro
+      value: dev
+    - type: xlrelease.StringVariable
+      key: instance_type
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Tipo de instancia EC2
+      description: Tipo de las instancias EC2 que se crearán. Para entornos productivos se recomiendan instancias de mayor capacidad.
+      valueProvider:
+        type: xlrelease.ListOfStringValueProviderConfiguration
+        values:
+        - t2.nano
+        - t2.micro
+        - t2.small
+        - t2.medium
+        - t2.large
+        - t2.xlarge
+        - t2.2xlarge
+      value: t2.micro
+    - type: xlrelease.StringVariable
+      key: project_name
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Nombre del proyecto
+      description: Nombre del proyecto a crear. Debe existir una aplicación del mismo nombre en XL Deploy bajo Applications/Infrastructures
+      value: calculator
+    - type: xlrelease.StringVariable
+      key: public_key_path
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Clave pública
+      description: Clave pública que se instalará en los servidores remotos para acceder a ellos. Debe estar accesible desde la máquina que aplique las templates de Terraform.
+      value: /home/jcla/.ssh/id_rsa.pub
+    - type: xlrelease.StringVariable
+      key: private_key_path
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Clave privada
+      description: Clave privada para acceder a las instancias EC2. Debe estar accesible desde la máquina de XL Deploy.
+      value: /home/jcla/.ssh/id_rsa
+    - type: xlrelease.ListStringVariable
+      key: versions_infrastructure_availables
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Versiones de infraestructura disponibles
+      description: Versiones de infraestructura disponibles
+    - type: xlrelease.StringVariable
+      key: version_infrastructure_selected
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Versión de la infraestructura seleccionada
+      valueProvider:
+        type: xlrelease.ListOfStringValueProviderConfiguration
+        variableMapping:
+          values: ${versions_infrastructure_availables}
+    - type: xlrelease.StringVariable
+      key: version_provisioning
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Versión de los playbooks de Ansible para provisionar la infraestructura
+      valueProvider:
+        type: xlrelease.ListOfStringValueProviderConfiguration
+        values:
+        - 3.0.0
+        - 2.0.0
+        - 1.0.0
+      value: 3.0.0
+    - type: xlrelease.StringVariable
+      key: ip_front
+      requiresValue: false
+      showOnReleaseStart: false
+      label: IP de la máquina de front
+      description: IP obtenida de forma dinámica de las instancias EC2 creadas
+    - type: xlrelease.StringVariable
+      key: ip_bdd
+      requiresValue: false
+      showOnReleaseStart: false
+      label: IP de la máquina de bdd
+      description: IP obtenida de forma dinámica de las instancias EC2 creadas
+    - type: xlrelease.ListStringVariable
+      key: list_tags
+      requiresValue: false
+      showOnReleaseStart: false
+    - type: xlrelease.StringVariable
+      key: tag_ansible_selected
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Versiones de playbooks disponibles
+      valueProvider:
+        type: xlrelease.ListOfStringValueProviderConfiguration
+        variableMapping:
+          values: ${list_tags}
+    - type: xlrelease.StringVariable
+      key: user_tomcat
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Usuario administrador de Tomcat
+      value: admin
+    - type: xlrelease.PasswordStringVariable
+      key: password_tomcat
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Password para el administrador de Tomcat
+    scriptUsername: admin
+    riskProfile: Default risk profile
+  - type: xlrelease.Dashboard
+    tiles:
+    - name: Release progress
+      type: xlrelease.ReleaseProgressTile
+    - name: Release summary
+      type: xlrelease.ReleaseSummaryTile
+    - name: Resource usage
+      type: xlrelease.ResourceUsageTile
+    - name: Release timeline
+      type: xlrelease.TimelineTile
+    - name: Release health
+      type: xlrelease.ReleaseHealthTile
+    parentTemplate: Deprovision infrastructure - java bdd project
+  - type: xlrelease.Dashboard
+    tiles:
+    - name: Release progress
+      type: xlrelease.ReleaseProgressTile
+    - name: Release summary
+      type: xlrelease.ReleaseSummaryTile
+    - name: Resource usage
+      type: xlrelease.ResourceUsageTile
+    - name: Release timeline
+      type: xlrelease.TimelineTile
+    - name: Release health
+      type: xlrelease.ReleaseHealthTile
+    parentTemplate: Provision new infrastructure - java bdd project
+---
+apiVersion: xl-release/v1
+kind: Permissions
+spec:
+- directory: Terraform
+  teams:
+  - name: Folder Owner
+    users:
+    - admin
+    permissions:
+    - folder#edit_variables
+    - group#edit
+    - folder#edit_configuration
+    - folder#view
+    - dashboard#edit
+    - folder#edit_security
+    - folder#edit
+    - dashboard#view
+    - group#view
+  - name: Release Admin
+    users:
+    - admin
+    permissions:
+    - release#edit_precondition
+    - release#edit
+    - release#reassign_task
+    - release#edit_security
+    - release#view
+    - release#lock_task
+    - release#start
+    - release#edit_blackout
+    - release#edit_failure_handler
+    - folder#view
+    - release#abort
+    - release#edit_task
+  - name: Template Owner
+    users:
+    - admin
+    permissions:
+    - template#edit
+    - template#lock_task
+    - template#view
+    - folder#view
+    - template#edit_triggers
+    - template#edit_precondition
+    - template#edit_security
+    - template#create_release
+    - template#edit_failure_handler
