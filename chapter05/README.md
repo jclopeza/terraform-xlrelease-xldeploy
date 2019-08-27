@@ -9,12 +9,16 @@ Esta será nuestra tercera fase en XL Release.
 
 Vamos a crear una tercera fase en XL Release en la que vamos a lanzar la ejecución de las templates.
 
+![xlrelease image](img_060.png)
+
 ### Paso 1: Creación de infraestructura en AWS (XL Deploy: Deploy)
 Se trata de indicar qué queremos desplegar y dónde, es decir, facilitar el Deployment Package y el entorno de destino o environment.
 Este script se ejecutará con el CLI para la creación de los recursos necesarios en XLD.
 
 * En `package` tendremos que indicar la versión que queremos desplegar: `${version_infrastructure_selected}` (depende del nombre de la variable que hayamos definido)
 * En `environment` el entorno que hemos creado dinámicamente en el paso anterior: `Environments/infrastructure-${project_name}/infrastructure-${project_name}-${environment}/infrastructure-${project_name}-${environment}`
+
+![xlrelease image](img_061.png)
 
 ### Paso 2: Obtención de las IPs remotas (XL Deploy CI: Get CI string property)
 Cuando se crea la infraestructura con XL Deploy y Terraform, se crean y registran también dos CIs del tipo overthere.SshHost de forma automática en XL Deploy con la información necesaria para acceder a las nuevas instancias EC2 creadas. Esto es, la dirección IP, sistema operativo, usuario y la ubicación de la clave privada para acceder a ellas.
@@ -31,3 +35,5 @@ Nombre de los CI:
 
 Property name:
 * address *(en ambos casos)*
+
+![xlrelease image](img_062.png)

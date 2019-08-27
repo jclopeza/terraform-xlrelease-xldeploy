@@ -16,6 +16,8 @@ Esta será nuestra segunda fase en XL Release.
 
 Vamos a crear una segunda fase en XL Release en la que vamos a crear los CIs necesarios en XL Deploy para poder desplegar nuestra infraestructura con un cliente de Terraform.
 
+![xlrelease image](img_055.png)
+
 ### Paso 1: Creación de infraestructura base en XLD (XL Deploy CLI: Run Script from URL)
 *Para definir este step, es necesario crear un servidor XL Deploy CLI bajo 'Settings -> Shared configuration' o bajo la pestaña 'Configuration' dentro de la carpeta en la que se ubique la template.*
 
@@ -28,10 +30,16 @@ Se pasarán las siguientes variables en el campo `options`:
 ${environment} ${project_name} ${aws_region} ${instance_type} ${private_key_path} ${public_key_path}
 ```
 
+![xlrelease image](img_056.png)
+
 ### Paso 2: Validación de entorno en XLD  (Manual)
 Incluímos un paso para que se verifique que se ha creado el entorno de forma correcta en XL Deploy. Esta validación también se podría haber hecho de forma automática.
 
 `Environments/infrastructure-${project_name}/infrastructure-${project_name}-${environment}/infrastructure-${project_name}-${environment}`
 
+![xlrelease image](img_057.png)
+
 ### Paso 3: Validación de solicitud y aprobación del equipo de seguridad (Gate)
 Incluímos una validación adicional que sólo tendrá lugar si el entorno seleccionado es el de producción.
+
+![xlrelease image](img_058.png)

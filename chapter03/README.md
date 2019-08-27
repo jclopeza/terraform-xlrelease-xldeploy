@@ -51,4 +51,4 @@ Aquí seleccionamos una de las versiones de infraestructura disponibles para el 
 
 ![xlrelease image](img_054.png)
 
-La selección del usuario la almacenamos en la variable ${version_infrastructure_selected}
+La selección del usuario la almacenamos en la variable `${version_infrastructure_selected}`
