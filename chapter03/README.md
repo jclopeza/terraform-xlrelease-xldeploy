@@ -9,6 +9,8 @@ Esta será nuestra primera fase en XL Release.
 
 Vamos a crear una primera fase en XL Release en la que vamos a recoger los parámetros con los que invocaremos a nuestras templates de Terraform.
 
+![xlrelease image](img_050.png)
+
 ### Paso 1: Parámetros de configuración e infraestructura (User Input)
 Definimos las siguientes variables en nuestra template de XL Release:
 * aws_region
@@ -35,10 +37,18 @@ Si no existe, detenemos el pipeline. Para ello marcamos `Throw on Fai` a true.
 
 Una mejora sería obtener automáticamente las aplicaciones disponibles bajo la carpeta `Applications/Infrastructures` y presentarlas en un 'List box'.
 
+![xlrelease image](img_052.png)
+
 ### Paso 3: Obtención de las versiones disponibles para ${project_name} (XL Deploy: Get All Versions)
 Aquí seleccionamos la versión de las templates de Terraform que queremos utilizar para crear nuestra infraestructura.
 
 Obtendremos un listado con las **distintas versiones de infraestructura disponibles** para el proyecto ${project_name}. El resultado lo almacenamos en una variable de tipo 'List'.
 
+![xlrelease image](img_053.png)
+
 ### Paso 4: Selección de versión de infraestructura (User Input)
 Aquí seleccionamos una de las versiones de infraestructura disponibles para el proyecto seleccionado.
+
+![xlrelease image](img_054.png)
+
+La selección del usuario la almacenamos en la variable ${version_infrastructure_selected}
