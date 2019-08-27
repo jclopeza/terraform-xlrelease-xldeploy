@@ -1,5 +1,5 @@
 # Terraform templates
-This is the very first thing we need.
+Esto es lo primero que necesitamos.
 
 Si empezamos a trabajar con Terraform, pronto descubriremos los módulos y nos daremos cuenta que es la mejor forma de reutilizar nuestro trabajo. A medida que vayamos mejorando nuestros módulos, podremos ir versionándolos y siempre sabremos de forma exacta con qué código fuente estamos creando nuestra infraestructura.
 
