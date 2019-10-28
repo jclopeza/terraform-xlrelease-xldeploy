@@ -125,7 +125,7 @@ spec:
       requiresValue: false
       showOnReleaseStart: false
       label: Nombre del proyecto
-      description: Nombre del proyecto a crear. Debe existir una aplicación del mismo nombre en XL Deploy bajo Applications/Infrastructures
+      description: Nombre del proyecto a crear. Debe existir una aplicación del mismo nombre en XL Deploy bajo Applications/Infrastructures/Terraform
       value: calculator
     - type: xlrelease.StringVariable
       key: public_key_path
@@ -213,7 +213,7 @@ spec:
       - name: Verificación de existencia de proyecto de infraestructura para ${project_name}
         type: xld.DoesCIExist
         server: XL Deploy
-        ciID: Applications/Infrastructures/infrastructure-${project_name}
+        ciID: Applications/Infrastructures/Terraform/infrastructure-${project_name}
         throwOnFail: true
         description: |-
           ## Verificación de existencia de proyecto de infraestructura para ${project_name}
@@ -222,7 +222,7 @@ spec:
       - name: Obtención de las versiones disponibles para ${project_name}
         type: xld.GetAllVersions
         server: XL Deploy
-        applicationId: Applications/Infrastructures/infrastructure-${project_name}
+        applicationId: Applications/Infrastructures/Terraform/infrastructure-${project_name}
         description: |-
           ## Obtención de las versiones disponibles para ${project_name}
 
@@ -246,7 +246,7 @@ spec:
       tasks:
       - name: Creación de infraestructura base en XLD
         type: xld.cliUrl
-        cli: xl-deploy-8.6.2-cli
+        cli: xl-deploy-9.0.5-cli
         scriptUrl: https://raw.githubusercontent.com/jclopeza/xlr-scripts/master/createXLDResourcesTerraformModuleJavaBddProject.py
         options: ${environment} ${project_name} ${aws_region} ${instance_type} ${private_key_path} ${public_key_path}
         description: |-
@@ -380,7 +380,7 @@ spec:
             Este script provisionará la instancia EC2 que encargará de la parte bdd.
       - name: Creación de entorno en XLD
         type: xld.cliUrl
-        cli: xl-deploy-8.6.2-cli
+        cli: xl-deploy-9.0.5-cli
         scriptUrl: https://raw.githubusercontent.com/jclopeza/xlr-scripts/master/createXLDResourcesTerraformModuleJavaBddProjectContainers.py
         options: ${environment} ${project_name} ${ip_front} ${ip_bdd}
         description: |-
@@ -515,7 +515,7 @@ spec:
       requiresValue: false
       showOnReleaseStart: false
       label: Nombre del proyecto
-      description: Nombre del proyecto a crear. Debe existir una aplicación del mismo nombre en XL Deploy bajo Applications/Infrastructures
+      description: Nombre del proyecto a crear. Debe existir una aplicación del mismo nombre en XL Deploy bajo Applications/Infrastructures/Terraform
       value: calculator
     - type: xlrelease.StringVariable
       key: public_key_path
